@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0f172a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="KIPU Demo" />
+
+<!-- Para vista previa en WhatsApp / link unfurl -->
+<meta property="og:title" content="KIPU · Seguridad Móvil Descentralizada" />
+<meta property="og:description" content="Prueba interactiva del sistema KIPU: protección automática contra robo de celulares y vaciado express de Yape, Plin y banca móvil." />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="es_PE" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="description" content="Prototipo interactivo de la app KIPU. Mueve el deslizador y observa cómo se ejecuta el bloqueo automático al alejarse el celular del usuario." />
+
+<title>KIPU · Prototipo App Móvil</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-deep: #0f172a;
+    --bg-graphite: #1e293b;
+    --bg-slate: #334155;
+    --slate: #64748b;
+    --slate-soft: #94a3b8;
+    --platinum: #f1f5f9;
+    --platinum-mute: #cbd5e1;
+
+    --emerald: #10b981;
+    --emerald-soft: rgba(16,185,129,.12);
+    --emerald-line: rgba(16,185,129,.32);
+    --amber: #f59e0b;
+    --amber-soft: rgba(245,158,11,.12);
+    --amber-line: rgba(245,158,11,.32);
+    --red: #ef4444;
+    --red-soft: rgba(239,68,68,.12);
+    --red-line: rgba(239,68,68,.32);
+    --cobalt: #2563eb;
+    --cobalt-hi: #3b82f6;
+    --cobalt-soft: rgba(37,99,235,.15);
+
+    --line: rgba(148,163,184,.14);
+    --line-strong: rgba(148,163,184,.24);
+
+    --font-serif: 'Fraunces', Georgia, serif;
+    --font-sans:  'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono:  'IBM Plex Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top:    env(safe-area-inset-top, 0px);
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; height: 100%; overscroll-behavior-y: none; }
+  body{
+    font-family: var(--font-sans);
+    background: var(--bg-deep);
+    color: var(--platinum);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(900px 600px at 50% -20%, rgba(37,99,235,.10), transparent 60%),
+      radial-gradient(700px 400px at 80% 110%, rgba(16,185,129,.05), transparent 60%);
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  body::before{
+    content:"";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(148,163,184,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148,163,184,.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 80%);
+    z-index: 0;
+  }
+
+  /* =========================================================
+     MOBILE FIRST — vista por defecto (≤ 1023px)
+     ========================================================= */
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding: calc(10px + var(--safe-top)) 16px 10px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 12px;
+    background: rgba(15,23,42,.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand{
+    display:flex; align-items:center; gap: 10px;
+  }
+  .brand-mark{
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(145deg, #1e293b, #0b1224);
+    border: 1px solid var(--line-strong);
+    display:grid; place-items:center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .brand-mark svg{ width: 16px; height: 16px; }
+  .brand-name{
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1;
+  }
+  .brand-sub{
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--slate-soft);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .live-tag{
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--emerald);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    padding: 5px 8px;
+    border: 1px solid var(--emerald-line);
+    background: var(--emerald-soft);
+    border-radius: 999px;
+    display:inline-flex; align-items:center; gap: 6px;
+    flex-shrink: 0;
+  }
+  .live-tag .dt{
+    width: 5px; height: 5px;
+    border-radius: 999px;
+    background: var(--emerald);
+    box-shadow: 0 0 6px var(--emerald);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* ---------- STEP RAIL (horizontal en móvil) ---------- */
+  .step-rail{
+    position: sticky;
+    top: 51px;
+    z-index: 25;
+    padding: 12px 16px;
+    background: rgba(15,23,42,.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .step-dots{
+    display:flex; align-items:center; gap: 6px;
+    margin-bottom: 8px;
+  }
+  .dot{
+    flex: 1;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(148,163,184,.18);
+    transition: background .3s ease;
+  }
+  .dot.is-done{ background: var(--emerald); }
+  .dot.is-active{ background: var(--cobalt-hi); box-shadow: 0 0 10px var(--cobalt-soft); }
+  .dot.is-alert{ background: var(--amber); }
+  .dot.is-locked{ background: var(--red); }
+  .step-current{
+    display:flex; align-items:baseline; gap: 8px;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .step-current .num{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--cobalt-hi);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .step-current .ttl{
+    font-family: var(--font-serif);
+    font-weight: 500;
+    color: var(--platinum);
+  }
+  .step-current .desc{
+    color: var(--slate-soft);
+    font-size: 12.5px;
+  }
+
+  /* ---------- APP CONTENT (centro, lo que importa) ---------- */
+  .app-shell{
+    padding: 16px 16px calc(220px + var(--safe-bottom));
+    position: relative;
+    z-index: 1;
+  }
+  .app-header{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 14px;
+  }
+  .app-header .greet{
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--platinum);
+    line-height: 1.1;
+  }
+  .app-header .sub{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--slate-soft);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .app-header .avatar{
+    width: 40px; height: 40px;
+    border-radius: 999px;
+    background: linear-gradient(145deg, #334155, #1e293b);
+    border: 1px solid var(--line-strong);
+    display:grid; place-items:center;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    color: var(--platinum-mute);
+    font-size: 16px;
+  }
+
+  /* Card principal de estado */
+  .state-card{
+    border-radius: 20px;
+    padding: 22px 20px;
+    background:
+      radial-gradient(ellipse at 50% 0%, var(--state-glow, rgba(16,185,129,.18)) 0%, transparent 70%),
+      linear-gradient(180deg, rgba(30,41,59,.85), rgba(15,23,42,.85));
+    border: 1px solid var(--state-line, var(--emerald-line));
+    transition: all .4s ease;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .state-card::before{
+    content:"";
+    position:absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--state-color, var(--emerald)), transparent);
+    opacity: .6;
+  }
+  .state-pill{
+    display:inline-flex; align-items:center; gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--state-color, var(--emerald));
+    background: var(--state-bg, var(--emerald-soft));
+    border: 1px solid var(--state-line, var(--emerald-line));
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+  .state-pill .live{
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .state-headline{
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -.01em;
+    margin: 0 0 6px;
+    color: var(--platinum);
+  }
+  .state-sub{
+    font-size: 13.5px;
+    color: var(--platinum-mute);
+    margin: 0 0 18px;
+    line-height: 1.55;
+  }
+
+  /* Visualizador de distancia BLE */
+  .distance-viz{
+    position: relative;
+    height: 88px;
+    margin-bottom: 14px;
+    background: radial-gradient(ellipse at 0% 50%, rgba(37,99,235,.18) 0%, transparent 40%);
+    border-radius: 12px;
+  }
+  .you-dot{
+    position:absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    width: 26px; height: 26px;
+    border-radius: 999px;
+    background: linear-gradient(145deg, #4b5563, #1f2937);
+    border: 1px solid rgba(241,245,249,.2);
+    display:grid; place-items:center;
+    z-index: 2;
+  }
+  .you-dot::after{
+    content:"";
+    position:absolute; inset:-6px;
+    border-radius: 999px;
+    border: 1px solid var(--cobalt-hi);
+    opacity: .4;
+    animation: ringPulse 2.2s ease-out infinite;
+  }
+  @keyframes ringPulse{
+    0%  { transform: scale(.9); opacity: .5; }
+    100%{ transform: scale(1.9); opacity: 0; }
+  }
+  .kipu-dot{
+    position: absolute;
+    left: var(--device-pos, 30%);
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px; height: 13px;
+    border-radius: 999px;
+    background: linear-gradient(155deg, #4b5563 0%, #1f2937 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 4px 10px rgba(0,0,0,.4);
+    transition: left .35s cubic-bezier(.4,.0,.2,1);
+    display:flex; align-items:center; justify-content:flex-end;
+    padding-right: 3px;
+  }
+  .kipu-dot::after{
+    content:""; width: 4px; height: 4px;
+    border-radius: 999px;
+    background: var(--state-color, var(--emerald));
+    box-shadow: 0 0 6px var(--state-color, var(--emerald));
+  }
+  .ble-line{
+    position: absolute;
+    left: 32px; right: calc(100% - var(--device-pos, 30%) + 4px);
+    top: 50%; height: 1.5px;
+    transform: translateY(-50%);
+    background-image: linear-gradient(90deg, var(--state-color, var(--emerald)) 50%, transparent 50%);
+    background-size: 6px 1.5px;
+    opacity: .8;
+    transition: right .35s cubic-bezier(.4,.0,.2,1);
+  }
+  .state-locked .ble-line{
+    background-image: linear-gradient(90deg, var(--red) 50%, transparent 50%);
+    opacity: .3;
+    animation: bleFlicker .6s ease infinite;
+  }
+  @keyframes bleFlicker{ 0%,100%{opacity:.3} 50%{opacity:0} }
+  .ruler{
+    position:absolute;
+    left: 32px; right: 10px; bottom: 8px;
+    display:flex; justify-content:space-between;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--slate);
+    letter-spacing: .08em;
+  }
+  .ruler .mark{ position: relative; padding-top: 8px; }
+  .ruler .mark::before{
+    content:""; position:absolute; top:0; left: 50%;
+    width: 1px; height: 4px;
+    background: var(--slate);
+    opacity: .5;
+  }
+  .ruler .mark.alert{ color: var(--amber); }
+  .ruler .mark.alert::before{ background: var(--amber); opacity: 1; }
+  .ruler .mark.danger{ color: var(--red); }
+  .ruler .mark.danger::before{ background: var(--red); opacity: 1; }
+
+  .state-metrics{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .metric{ display:flex; flex-direction:column; }
+  .metric .k{
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--slate-soft);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .metric .v{
+    font-family: var(--font-serif);
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--platinum);
+    margin-top: 3px;
+  }
+  .metric .v.color{ color: var(--state-color, var(--emerald)); }
+
+  /* Apps protegidas */
+  .apps-card{
+    border-radius: 18px;
+    padding: 16px;
+    background: linear-gradient(180deg, rgba(30,41,59,.6), rgba(15,23,42,.6));
+    border: 1px solid var(--line);
+    margin-bottom: 14px;
+  }
+  .apps-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 14px;
+  }
+  .apps-head .ttl{
+    font-family: var(--font-serif);
+    font-size: 14.5px;
+    color: var(--platinum);
+    font-weight: 500;
+  }
+  .apps-head .count{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--slate-soft);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .apps-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .app{
+    display:flex; flex-direction:column;
+    align-items:center; gap: 6px;
+  }
+  .app-ic{
+    width: 48px; height: 48px;
+    border-radius: 13px;
+    display:grid; place-items:center;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 17px;
+    color: white;
+    position: relative;
+    transition: all .35s ease;
+  }
+  .app-ic.yape  { background: linear-gradient(145deg, #6b21a8, #4c1d95);}
+  .app-ic.plin  { background: linear-gradient(145deg, #0891b2, #0e7490);}
+  .app-ic.bcp   { background: linear-gradient(145deg, #1d4ed8, #1e3a8a);}
+  .app-ic.ibk   { background: linear-gradient(145deg, #15803d, #166534);}
+  .app-ic.bbva  { background: linear-gradient(145deg, #1e40af, #1e3a8a);}
+  .app-ic.scotia{ background: linear-gradient(145deg, #b91c1c, #991b1b);}
+  .app-ic.tunki { background: linear-gradient(145deg, #db2777, #9d174d);}
+  .app-ic.other { background: linear-gradient(145deg, #475569, #334155);}
+  .app-ic::after{
+    content:"";
+    position:absolute; bottom:-2px; right:-2px;
+    width: 14px; height: 14px;
+    border-radius: 999px;
+    background: var(--emerald);
+    border: 2px solid var(--bg-deep);
+    transition: all .35s ease;
+  }
+  .app-name{
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--slate-soft);
+    letter-spacing: .08em;
+  }
+  .state-alert .app-ic{ filter: saturate(.6) brightness(.85); }
+  .state-alert .app-ic::after{ background: var(--amber); }
+  .state-locked .app-ic{ filter: grayscale(1) brightness(.4); }
+  .state-locked .app-ic::after{
+    background: var(--red);
+    animation: dangerPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes dangerPulse{
+    0%,100%{ box-shadow: 0 0 0 0 rgba(239,68,68,.5); }
+    50%   { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+  }
+  .state-home .app-ic{ filter: saturate(.9) brightness(.95); }
+  .state-home .app-ic::after{ background: var(--cobalt-hi); }
+
+  /* Modo actual */
+  .mode-row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .mode-tile{
+    padding: 12px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(30,41,59,.55), rgba(15,23,42,.55));
+    border: 1px solid var(--line);
+    display:flex; align-items:center; gap: 10px;
+    transition: all .25s ease;
+  }
+  .mode-tile.active{
+    border-color: var(--cobalt-hi);
+    background: linear-gradient(180deg, rgba(37,99,235,.15), rgba(15,23,42,.55));
+  }
+  .mode-tile .ic{
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(241,245,249,.06);
+    display:grid; place-items:center;
+    color: var(--platinum-mute);
+    flex-shrink: 0;
+  }
+  .mode-tile.active .ic{
+    background: var(--cobalt-soft);
+    color: var(--cobalt-hi);
+  }
+  .mode-tile .ic svg{ width: 16px; height: 16px; }
+  .mode-tile .meta{ display:flex; flex-direction:column; line-height: 1.1; min-width: 0; }
+  .mode-tile .meta .lbl{
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--slate-soft);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .mode-tile .meta .val{
+    font-family: var(--font-serif);
+    font-size: 13.5px;
+    color: var(--platinum);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .mode-tile.active .meta .val{ color: var(--cobalt-hi); }
+
+  /* Helper didáctico */
+  .helper{
+    padding: 14px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(30,41,59,.6), rgba(15,23,42,.6));
+    border: 1px solid var(--line);
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--platinum-mute);
+    display:flex; gap: 12px; align-items:flex-start;
+  }
+  .helper .ic{
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--cobalt-soft);
+    color: var(--cobalt-hi);
+    display:grid; place-items:center;
+    flex-shrink: 0;
+  }
+  .helper .ic svg{ width: 14px; height: 14px; }
+  .helper strong{ color: var(--platinum); font-weight: 500; }
+
+  /* Botón acción */
+  .app-action{
+    width: 100%;
+    margin-bottom: 14px;
+    padding: 15px 18px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--cobalt-hi), var(--cobalt));
+    color: white;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+    box-shadow: 0 10px 24px -10px rgba(37,99,235,.7);
+    display:inline-flex; align-items:center; justify-content:center; gap: 10px;
+    transition: filter .2s, transform .15s;
+  }
+  .app-action:active{ transform: translateY(1px); }
+  .state-locked .app-action{
+    background: linear-gradient(180deg, #f87171, var(--red));
+    box-shadow: 0 10px 24px -10px rgba(239,68,68,.7);
+  }
+  .state-alert .app-action{
+    background: linear-gradient(180deg, #fbbf24, var(--amber));
+    box-shadow: 0 10px 24px -10px rgba(245,158,11,.6);
+    color: #1c1917;
+  }
+
+  /* Overlay bloqueo */
+  .lock-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(10,16,32,.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding: 32px 24px;
+    text-align:center;
+    z-index: 60;
+  }
+  .lock-overlay.is-on{ display:flex; animation: overlayIn .4s ease both; }
+  @keyframes overlayIn{ from{opacity:0} to{opacity:1} }
+  .lock-icon{
+    width: 86px; height: 86px;
+    border-radius: 999px;
+    background: var(--red-soft);
+    border: 1px solid var(--red-line);
+    display:grid; place-items:center;
+    margin-bottom: 22px;
+    animation: lockBeat 1.5s ease-in-out infinite;
+  }
+  @keyframes lockBeat{
+    0%,100%{ box-shadow: 0 0 0 0 rgba(239,68,68,.5);}
+    50%   { box-shadow: 0 0 0 22px rgba(239,68,68,0);}
+  }
+  .lock-icon svg{ width: 40px; height: 40px; stroke: var(--red);}
+  .lock-overlay h3{
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 26px;
+    margin: 0 0 10px;
+    color: var(--platinum);
+    line-height: 1.15;
+    letter-spacing: -.01em;
+  }
+  .lock-overlay p{
+    font-size: 14.5px;
+    color: var(--platinum-mute);
+    margin: 0 0 22px;
+    max-width: 320px;
+    line-height: 1.55;
+  }
+  .lock-code{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: .14em;
+    padding: 9px 14px;
+    border: 1px dashed var(--red-line);
+    border-radius: 7px;
+    background: var(--red-soft);
+    margin-bottom: 22px;
+  }
+  .unlock-btn{
+    background: linear-gradient(180deg, #f1f5f9, #cbd5e1);
+    color: #0f172a;
+    border: 0;
+    border-radius: 12px;
+    padding: 14px 22px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display:inline-flex; align-items:center; gap: 10px;
+  }
+
+  /* Notificación in-app */
+  .notif{
+    position: fixed;
+    top: calc(120px + var(--safe-top));
+    left: 16px; right: 16px;
+    z-index: 28;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(30,41,59,.96), rgba(15,23,42,.96));
+    border: 1px solid var(--state-line, var(--amber-line));
+    transform: translateY(-14px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all .35s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .notif.is-on{ transform: translateY(0); opacity: 1; }
+  .notif-row{ display:flex; align-items:flex-start; gap: 10px; }
+  .notif-ic{
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--state-bg, var(--amber-soft));
+    color: var(--state-color, var(--amber));
+    display:grid; place-items:center;
+    flex-shrink:0;
+  }
+  .notif-ic svg{ width: 14px; height: 14px; }
+  .notif-body .ttl{
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--platinum);
+    margin: 0 0 2px;
+  }
+  .notif-body .msg{
+    font-size: 11.5px;
+    color: var(--platinum-mute);
+    line-height: 1.45;
+  }
+  .notif-time{
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--slate);
+    margin-left: auto;
+    letter-spacing: .08em;
+    flex-shrink:0;
+  }
+
+  /* =========================================================
+     CONTROLES — barra fija inferior (móvil)
+     ========================================================= */
+  .controls{
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 40;
+    padding: 14px 16px calc(16px + var(--safe-bottom));
+    background: linear-gradient(180deg, rgba(15,23,42,.7) 0%, rgba(15,23,42,.96) 30%);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--line);
+  }
+  .ctrl-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 10px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--slate-soft);
+  }
+  .ctrl-head .v{
+    font-family: var(--font-serif);
+    font-size: 17px;
+    color: var(--platinum);
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .ctrl-head .v .unit{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--slate-soft);
+    margin-left: 3px;
+  }
+
+  /* Slider */
+  input[type="range"]{
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg,
+      var(--emerald) 0%, var(--emerald) 40%,
+      var(--amber) 40%, var(--amber) 60%,
+      var(--red) 60%, var(--red) 100%);
+    border-radius: 999px;
+    outline: none;
+    cursor: pointer;
+    margin: 0;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px; height: 26px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 30%, #f8fafc, #cbd5e1 60%, #94a3b8 100%);
+    border: 2px solid var(--bg-deep);
+    box-shadow: 0 6px 14px rgba(0,0,0,.6);
+    cursor: grab;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width: 26px; height: 26px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 30%, #f8fafc, #cbd5e1 60%, #94a3b8 100%);
+    border: 2px solid var(--bg-deep);
+    box-shadow: 0 6px 14px rgba(0,0,0,.6);
+    cursor: grab;
+  }
+  .slider-zones{
+    display:grid;
+    grid-template-columns: 4fr 2fr 4fr;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .slider-zones .z-ok  { color: var(--emerald); text-align:left; }
+  .slider-zones .z-warn{ color: var(--amber); text-align:center; }
+  .slider-zones .z-bad { color: var(--red); text-align:right; }
+
+  /* Pills de escenarios */
+  .scenarios{
+    display:flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    margin: 0 -16px 10px;
+    padding-left: 16px;
+    padding-right: 16px;
+    scrollbar-width: none;
+  }
+  .scenarios::-webkit-scrollbar{ display: none; }
+  .sc-btn{
+    flex-shrink: 0;
+    padding: 9px 13px;
+    border: 1px solid var(--line-strong);
+    background: rgba(15,23,42,.5);
+    color: var(--platinum-mute);
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 500;
+    border-radius: 999px;
+    cursor: pointer;
+    display:inline-flex; align-items:center; gap: 8px;
+    transition: all .2s ease;
+    white-space: nowrap;
+  }
+  .sc-btn:hover{ background: rgba(30,41,59,.85); color: var(--platinum); }
+  .sc-btn .ic{
+    width: 14px; height: 14px;
+    display:grid; place-items:center;
+  }
+  .sc-btn.danger .ic{ color: var(--red); }
+  .sc-btn.warn .ic  { color: var(--amber); }
+  .sc-btn.ok .ic    { color: var(--emerald); }
+  .sc-btn.brand .ic { color: var(--cobalt-hi); }
+
+  /* Toggles compactos */
+  .toggles{
+    display:flex;
+    gap: 8px;
+  }
+  .toggle-chip{
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: rgba(15,23,42,.5);
+    display:flex; align-items:center; justify-content: space-between;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .toggle-chip.on{
+    border-color: var(--cobalt);
+    background: rgba(37,99,235,.1);
+  }
+  .toggle-chip .lbl{
+    font-size: 11.5px;
+    color: var(--platinum-mute);
+    font-weight: 500;
+    line-height: 1.1;
+  }
+  .toggle-chip.on .lbl{ color: var(--cobalt-hi); }
+  .toggle-dot{
+    width: 28px; height: 16px;
+    border-radius: 999px;
+    background: rgba(100,116,139,.35);
+    position: relative;
+    transition: background .2s;
+    flex-shrink: 0;
+  }
+  .toggle-dot::after{
+    content:"";
+    position:absolute;
+    top: 2px; left: 2px;
+    width: 12px; height: 12px;
+    border-radius: 999px;
+    background: var(--platinum);
+    transition: transform .2s;
+  }
+  .toggle-chip.on .toggle-dot{ background: var(--cobalt); }
+  .toggle-chip.on .toggle-dot::after{ transform: translateX(12px); }
+
+  /* =========================================================
+     DESKTOP (≥ 1024px) — layout de 3 columnas + frame celular
+     ========================================================= */
+  @media (min-width: 1024px){
+
+    body{ padding-bottom: 0; }
+
+    /* Topbar más amplio */
+    .topbar{
+      padding: 18px 32px;
+    }
+    .brand-mark{ width: 38px; height: 38px; border-radius: 10px; }
+    .brand-mark svg{ width: 20px; height: 20px; }
+    .brand-name{ font-size: 20px; }
+
+    /* Quitar step rail superior, va a la izquierda */
+    .step-rail{
+      display:none;
+    }
+
+    /* Layout principal: 3 columnas */
+    .stage{
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
+      display: grid;
+      grid-template-columns: 280px 1fr 320px;
+      gap: 40px;
+      align-items: start;
+    }
+
+    /* Sidebar steps (escritorio) */
+    .steps-side{ position: sticky; top: 90px; }
+    .steps-side h4{
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--slate-soft);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      margin: 0 0 16px;
+    }
+    .steps-list{ list-style: none; padding: 0; margin: 0; }
+    .step-item{
+      padding: 14px 0 14px 36px;
+      position: relative;
+      border-left: 1px dashed var(--line-strong);
+      margin-left: 12px;
+      transition: all .25s ease;
+    }
+    .step-item:last-child{ border-left-color: transparent; }
+    .step-item::before{
+      content: attr(data-n);
+      position: absolute;
+      left: -13px;
+      top: 14px;
+      width: 26px; height: 26px;
+      border-radius: 999px;
+      background: var(--bg-graphite);
+      border: 1px solid var(--line-strong);
+      color: var(--slate-soft);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      display:grid; place-items:center;
+      transition: all .25s ease;
+    }
+    .step-item h5{
+      margin: 0 0 4px;
+      font-family: var(--font-serif);
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--platinum-mute);
+    }
+    .step-item p{
+      margin: 0;
+      font-size: 13px;
+      color: var(--slate);
+      line-height: 1.55;
+    }
+    .step-item.is-active::before{
+      background: var(--cobalt);
+      border-color: var(--cobalt);
+      color: white;
+      box-shadow: 0 0 0 5px var(--cobalt-soft);
+    }
+    .step-item.is-active h5{ color: var(--platinum); }
+    .step-item.is-active p{ color: var(--platinum-mute); }
+    .step-item.is-done::before{
+      content: "✓";
+      background: var(--emerald-soft);
+      border-color: var(--emerald-line);
+      color: var(--emerald);
+    }
+    .step-item.is-alert::before{
+      background: var(--amber-soft);
+      border-color: var(--amber-line);
+      color: var(--amber);
+    }
+    .step-item.is-locked::before{
+      background: var(--red-soft);
+      border-color: var(--red-line);
+      color: var(--red);
+    }
+
+    /* Phone wrap centro */
+    .app-shell{
+      display: flex; flex-direction: column;
+      align-items: center;
+      padding: 0;
+    }
+    .phone-label{
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--slate-soft);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      display:inline-flex; align-items:center; gap: 10px;
+      margin-bottom: 18px;
+    }
+    .phone-label .pt{
+      width: 6px; height: 6px;
+      border-radius: 999px;
+      background: var(--cobalt-hi);
+      box-shadow: 0 0 8px var(--cobalt-hi);
+    }
+
+    /* En escritorio el contenido se mete en un "frame" de teléfono */
+    .phone-frame{
+      width: 360px;
+      aspect-ratio: 9 / 19.5;
+      border-radius: 48px;
+      background: linear-gradient(160deg, #1f2937 0%, #0b1020 100%);
+      padding: 14px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.06),
+        0 30px 80px -20px rgba(0,0,0,.7),
+        0 0 0 1px rgba(148,163,184,.12);
+      position: relative;
+    }
+    .phone-frame::before{
+      content:"";
+      position:absolute; left:-2px; top: 110px;
+      width: 3px; height: 36px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #1f2937, #374151);
+      box-shadow: 0 60px 0 #1f2937, 0 110px 0 #1f2937;
+    }
+    .phone-frame::after{
+      content:"";
+      position:absolute; right:-2px; top: 150px;
+      width: 3px; height: 60px;
+      border-radius: 2px;
+      background: linear-gradient(-90deg, #1f2937, #374151);
+    }
+    .phone-screen{
+      width: 100%; height: 100%;
+      border-radius: 36px;
+      background: #0a1020;
+      overflow: hidden;
+      position: relative;
+      display:flex; flex-direction:column;
+    }
+    .notch{
+      position:absolute;
+      top: 8px; left: 50%;
+      transform: translateX(-50%);
+      width: 90px; height: 28px;
+      background: #000;
+      border-radius: 999px;
+      z-index: 10;
+    }
+    .status-bar{
+      padding: 14px 24px 8px;
+      display:flex; align-items:center; justify-content:space-between;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--platinum);
+    }
+    .status-bar .icons{ display:flex; align-items:center; gap: 6px; }
+    .status-bar .icons svg{ width: 14px; height: 14px; }
+    .app-content-wrap{
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 18px 24px;
+    }
+    .app-content-wrap::-webkit-scrollbar{ width: 0; }
+    .app-content-wrap .helper{
+      margin-top: 6px;
+    }
+
+    .app-header .greet{ font-size: 18px; }
+    .state-headline{ font-size: 22px; }
+    .state-sub{ font-size: 12.5px; }
+    .state-card{ padding: 20px 18px; }
+    .app-ic{ width: 44px; height: 44px; font-size: 16px;}
+
+    .phone-helper-mobile{ display:none; }
+
+    /* Ocultamos la notif fija — en escritorio va dentro del teléfono */
+    .notif{
+      position: absolute;
+      top: 60px; left: 16px; right: 16px;
+    }
+
+    /* Ocultamos lock fixed mobile, el del teléfono va dentro del frame */
+    .lock-overlay{
+      position: absolute;
+      inset: 0;
+      border-radius: 36px;
+    }
+
+    /* Sidebar controles a la derecha */
+    .controls{
+      position: sticky;
+      top: 90px;
+      left: auto; right: auto; bottom: auto;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(30,41,59,.7), rgba(15,23,42,.7));
+      backdrop-filter: none;
+    }
+    .ctrl-head{ margin-bottom: 16px; }
+    .scenarios{
+      flex-direction: column;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .sc-btn{
+      width: 100%;
+      border-radius: 10px;
+      justify-content: flex-start;
+      padding: 11px 14px;
+    }
+    .toggles{
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Mostrar etiqueta de phone solo en escritorio */
+    .phone-label{ display: inline-flex; }
+    .show-mobile{ display: none; }
+    .show-desktop{ display: block; }
+  }
+
+  /* En móvil ocultamos cosas que solo deben verse en escritorio */
+  @media (max-width: 1023.98px){
+    .phone-label,
+    .notch,
+    .status-bar,
+    .steps-side,
+    .show-desktop{ display: none; }
+    .phone-frame{ all: unset; display: block; }
+    .phone-screen{ background: transparent; }
+    .app-content-wrap{ padding: 0; }
+  }
+
+  /* Intro arriba (escritorio) */
+  .intro-desk{ display: none; }
+  @media (min-width: 1024px){
+    .intro-desk{
+      display: block;
+      max-width: 1400px;
+      margin: 36px auto 0;
+      padding: 0 32px;
+    }
+    .intro-desk h1{
+      font-family: var(--font-serif);
+      font-weight: 500;
+      font-size: clamp(28px, 3.4vw, 40px);
+      line-height: 1.1;
+      letter-spacing: -.02em;
+      max-width: 820px;
+      margin: 14px 0 14px;
+    }
+    .intro-desk h1 em{
+      font-style: italic;
+      background: linear-gradient(180deg, var(--platinum), #93b4ec);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .intro-desk p{
+      max-width: 720px;
+      color: var(--platinum-mute);
+      font-size: 15px;
+      margin: 0;
+    }
+    .intro-desk .eyebrow{
+      display:inline-flex; align-items:center; gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--slate-soft);
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+    .intro-desk .eyebrow .num{ color: var(--emerald);}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ TOPBAR ============ -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M6 4V20" stroke="#f1f5f9" stroke-width="2" stroke-linecap="round"/>
+        <path d="M6 12L17 4" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+        <path d="M6 12L17 20" stroke="#f1f5f9" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <div>
+      <div class="brand-name">KIPU</div>
+      <div class="brand-sub">Prototipo · Demo</div>
+    </div>
+  </div>
+  <span class="live-tag">
+    <span class="dt"></span>
+    <span>EN VIVO</span>
+  </span>
+</header>
+
+<!-- ============ STEP RAIL (móvil) ============ -->
+<div class="step-rail">
+  <div class="step-dots" id="step-dots">
+    <div class="dot is-active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+  <div class="step-current">
+    <span class="num" id="step-num">PASO 01</span>
+    <span><span class="ttl" id="step-ttl">Vinculación activa.</span> <span class="desc" id="step-desc">Celular y cápsula KIPU enlazados.</span></span>
+  </div>
+</div>
+
+<!-- ============ INTRO (escritorio) ============ -->
+<div class="intro-desk">
+  <span class="eyebrow"><span class="num">▶</span> Simulación didáctica</span>
+  <h1>Mueve el deslizador y observa cómo KIPU <em>protege automáticamente</em> tu billetera digital al alejarse el celular del usuario.</h1>
+  <p>Este prototipo recrea el comportamiento real de la app móvil en tres estados: zona segura, alerta perimetral y bloqueo automático por ruptura del enlace Bluetooth. Usa los controles del panel para simular escenarios reales.</p>
+</div>
+
+<!-- ============ STAGE ============ -->
+<main class="stage">
+
+  <!-- Pasos (solo escritorio) -->
+  <aside class="steps-side">
+    <h4>Flujo del usuario</h4>
+    <ol class="steps-list" id="steps">
+      <li class="step-item is-active" data-n="1"><h5>Vinculación activa</h5><p>El celular y la cápsula KIPU mantienen un enlace BLE estable. La protección está armada.</p></li>
+      <li class="step-item" data-n="2"><h5>Distancia crítica</h5><p>Entre 10 y 15 m la app emite alerta preventiva y solicita confirmación discreta.</p></li>
+      <li class="step-item" data-n="3"><h5>Bloqueo perimetral</h5><p>Al superar los 15 m la app ejecuta el Dead Man's Switch: cierra sesiones y borra caché.</p></li>
+      <li class="step-item" data-n="4"><h5>Recuperación segura</h5><p>El usuario legítimo desbloquea con PIN Maestro o biometría. Sin pérdida de datos.</p></li>
+    </ol>
+  </aside>
+
+  <!-- Phone / app -->
+  <section class="app-shell">
+    <span class="phone-label show-desktop"><span class="pt"></span> Pantalla principal · App KIPU</span>
+
+    <div class="phone-frame">
+      <div class="phone-screen" id="screen">
+        <div class="notch"></div>
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <span class="icons" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 17h4v3H2zm6-3h4v6H8zm6-3h4v9h-4zm6-3h4v12h-4z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C7 4 3 8 3 12s4 8 9 8 9-4 9-8-4-8-9-8zm0 3a5 5 0 0 1 5 5h-2a3 3 0 0 0-3-3V7z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="16" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="5" y="10" width="10" height="4" fill="currentColor"/><rect x="20" y="10" width="2" height="4" fill="currentColor"/></svg>
+          </span>
+        </div>
+
+        <div class="app-content-wrap">
+          <div class="app-header">
+            <div>
+              <div class="greet">Hola, Diego</div>
+              <div class="sub" id="hdr-status">Sistema armado · Lima · San Isidro</div>
+            </div>
+            <div class="avatar">D</div>
+          </div>
+
+          <div class="state-card" id="state-card">
+            <span class="state-pill" id="state-pill">
+              <span class="live"></span>
+              <span id="state-pill-text">PROTEGIDO</span>
+            </span>
+            <h2 class="state-headline" id="state-headline">Tu patrimonio está protegido.</h2>
+            <p class="state-sub" id="state-sub">La cápsula KIPU y tu celular están enlazados dentro del radio seguro.</p>
+
+            <div class="distance-viz" id="viz">
+              <div class="ble-line"></div>
+              <div class="you-dot">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="white" stroke-width="2"><rect x="7" y="3" width="10" height="18" rx="2"/></svg>
+              </div>
+              <div class="kipu-dot"></div>
+              <div class="ruler">
+                <span class="mark">0 m</span>
+                <span class="mark">5</span>
+                <span class="mark alert">10</span>
+                <span class="mark danger">15+</span>
+              </div>
+            </div>
+
+            <div class="state-metrics">
+              <div class="metric">
+                <span class="k">Distancia BLE</span>
+                <span class="v" id="metric-distance">3.4 m</span>
+              </div>
+              <div class="metric">
+                <span class="k">Latencia</span>
+                <span class="v color" id="metric-latency">42 ms</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="apps-card">
+            <div class="apps-head">
+              <span class="ttl">Apps protegidas</span>
+              <span class="count" id="apps-count">8 vigentes</span>
+            </div>
+            <div class="apps-grid">
+              <div class="app"><div class="app-ic yape">Y</div><span class="app-name">Yape</span></div>
+              <div class="app"><div class="app-ic plin">P</div><span class="app-name">Plin</span></div>
+              <div class="app"><div class="app-ic bcp">B</div><span class="app-name">BCP</span></div>
+              <div class="app"><div class="app-ic ibk">I</div><span class="app-name">IBK</span></div>
+              <div class="app"><div class="app-ic bbva">V</div><span class="app-name">BBVA</span></div>
+              <div class="app"><div class="app-ic scotia">S</div><span class="app-name">Scotia</span></div>
+              <div class="app"><div class="app-ic tunki">T</div><span class="app-name">Tunki</span></div>
+              <div class="app"><div class="app-ic other">+</div><span class="app-name">Otras</span></div>
+            </div>
+          </div>
+
+          <div class="mode-row">
+            <div class="mode-tile" id="mode-mobile">
+              <div class="ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>
+              </div>
+              <div class="meta"><span class="lbl">Modo activo</span><span class="val">Móvil</span></div>
+            </div>
+            <div class="mode-tile" id="mode-home">
+              <div class="ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2v-9z" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="meta"><span class="lbl">Geofence</span><span class="val">Hogar</span></div>
+            </div>
+          </div>
+
+          <button class="app-action" id="app-action">
+            <span id="app-action-text">Ver historial de protección</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M14 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+
+          <div class="helper" id="helper">
+            <div class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16v.5" stroke-linecap="round"/></svg>
+            </div>
+            <div id="helper-text"><strong>Estado seguro:</strong> Mientras el celular y la cápsula KIPU estén dentro de los 10 metros, todo funciona con normalidad.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ NOTIFICACIÓN ============ -->
+<div class="notif" id="notif">
+  <div class="notif-row">
+    <div class="notif-ic">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5M12 16v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 3l10 18H2L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="notif-body">
+      <div class="ttl" id="notif-ttl">Alerta perimetral</div>
+      <div class="msg" id="notif-msg">El celular se aleja de KIPU.</div>
+    </div>
+    <div class="notif-time">ahora</div>
+  </div>
+</div>
+
+<!-- ============ OVERLAY DE BLOQUEO ============ -->
+<div class="lock-overlay" id="lock-overlay">
+  <div class="lock-icon">
+    <svg viewBox="0 0 24 24" fill="none">
+      <rect x="5" y="11" width="14" height="9" rx="2" stroke-width="2" stroke="currentColor"/>
+      <path d="M8 11V8a4 4 0 1 1 8 0v3" stroke-width="2" stroke="currentColor"/>
+      <circle cx="12" cy="15.5" r="1.4" fill="currentColor"/>
+    </svg>
+  </div>
+  <h3>Bloqueo perimetral ejecutado</h3>
+  <p>Dead Man's Switch activado. Las billeteras digitales fueron cerradas y la memoria caché eliminada.</p>
+  <div class="lock-code">EVT-LOCK · KIPU-LIM-2026 / #4827</div>
+  <button class="unlock-btn" id="unlock-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M5 9V7a4 4 0 1 1 8 0v2M3 9h12v10H3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Desbloquear con PIN Maestro
+  </button>
+</div>
+
+<!-- ============ CONTROLES ============ -->
+<aside class="controls">
+  <div class="ctrl-head">
+    <span>Distancia BLE</span>
+    <span class="v"><span id="sim-dist-val">3.4</span><span class="unit">m</span></span>
+  </div>
+  <input type="range" id="distance" min="0" max="25" step="0.1" value="3.4" />
+  <div class="slider-zones">
+    <span class="z-ok">Seguro 0–10</span>
+    <span class="z-warn">Alerta 10–15</span>
+    <span class="z-bad">Bloqueo 15+</span>
+  </div>
+
+  <div class="scenarios">
+    <button class="sc-btn ok" id="sc-reset">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" stroke-linecap="round"/><path d="M3 3v5h5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Restaurar
+    </button>
+    <button class="sc-btn warn" id="sc-walk">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="4" r="2"/><path d="M10 22l1-7-3-3 2-6 4 4 3 1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Alejamiento gradual
+    </button>
+    <button class="sc-btn danger" id="sc-snatch">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9-9 9-9-9z" stroke-linejoin="round"/><path d="M12 8v4M12 16v.5" stroke-linecap="round"/></svg></span>
+      Robo por arrebato
+    </button>
+    <button class="sc-btn brand" id="sc-jam">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12c4-7 16-7 20 0M5 15c3-4 11-4 14 0" stroke-linecap="round"/><path d="M3 3l18 18" stroke-linecap="round"/></svg></span>
+      Anti-Jamming
+    </button>
+  </div>
+
+  <div class="toggles">
+    <div class="toggle-chip" id="t-home">
+      <div class="lbl">Modo Hogar</div>
+      <div class="toggle-dot"></div>
+    </div>
+    <div class="toggle-chip on" id="t-jam">
+      <div class="lbl">Anti-Jamming</div>
+      <div class="toggle-dot"></div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  const screen = document.getElementById('screen');
+  const slider = document.getElementById('distance');
+  const valEl = document.getElementById('sim-dist-val');
+  const metricDist = document.getElementById('metric-distance');
+  const metricLat  = document.getElementById('metric-latency');
+  const headline = document.getElementById('state-headline');
+  const sub = document.getElementById('state-sub');
+  const pill = document.getElementById('state-pill');
+  const pillText = document.getElementById('state-pill-text');
+  const hdrStatus = document.getElementById('hdr-status');
+  const card = document.getElementById('state-card');
+  const viz = document.getElementById('viz');
+  const action = document.getElementById('app-action');
+  const actionText = document.getElementById('app-action-text');
+  const lockOverlay = document.getElementById('lock-overlay');
+  const unlockBtn = document.getElementById('unlock-btn');
+  const notif = document.getElementById('notif');
+  const notifTtl = document.getElementById('notif-ttl');
+  const notifMsg = document.getElementById('notif-msg');
+  const appsCount = document.getElementById('apps-count');
+  const helperTxt = document.getElementById('helper-text');
+  const stepsDesk = document.querySelectorAll('#steps .step-item');
+  const stepDots = document.querySelectorAll('#step-dots .dot');
+  const stepNum  = document.getElementById('step-num');
+  const stepTtl  = document.getElementById('step-ttl');
+  const stepDesc = document.getElementById('step-desc');
+
+  const tHome = document.getElementById('t-home');
+  const tJam  = document.getElementById('t-jam');
+  const modeMobile = document.getElementById('mode-mobile');
+  const modeHome   = document.getElementById('mode-home');
+
+  let walkInterval = null;
+
+  const STEPS = [
+    { num: 'PASO 01', ttl: 'Vinculación activa.',  desc: 'Celular y cápsula KIPU enlazados.' },
+    { num: 'PASO 02', ttl: 'Distancia crítica.',   desc: 'Entre 10 y 15 m: alerta preventiva.' },
+    { num: 'PASO 03', ttl: 'Bloqueo perimetral.',  desc: 'Dead Man\'s Switch ejecutado.' },
+    { num: 'PASO 04', ttl: 'Recuperación segura.', desc: 'Desbloqueo con PIN Maestro.' }
+  ];
+
+  function getZone(d){
+    if(d < 10) return 'ok';
+    if(d < 15) return 'alert';
+    return 'locked';
+  }
+
+  function setColors(color, bg, line, glow){
+    card.style.setProperty('--state-color', color);
+    card.style.setProperty('--state-bg', bg);
+    card.style.setProperty('--state-line', line);
+    card.style.setProperty('--state-glow', glow);
+    pill.style.setProperty('--state-color', color);
+    pill.style.setProperty('--state-bg', bg);
+    pill.style.setProperty('--state-line', line);
+    notif.style.setProperty('--state-line', line);
+    notif.style.setProperty('--state-bg', bg);
+    notif.style.setProperty('--state-color', color);
+  }
+
+  function showNotif(o){
+    notifTtl.textContent = o.title;
+    notifMsg.textContent = o.msg;
+    notif.classList.add('is-on');
+  }
+  function hideNotif(){ notif.classList.remove('is-on'); }
+  function showLock(){ lockOverlay.classList.add('is-on'); }
+  function hideLock(){ lockOverlay.classList.remove('is-on'); }
+
+  function activateStep(idx){
+    // Sidebar desktop
+    stepsDesk.forEach((s,i) => {
+      s.classList.remove('is-active','is-done','is-alert','is-locked');
+      if(i < idx) s.classList.add('is-done');
+      else if(i === idx){
+        s.classList.add('is-active');
+        if(idx === 1) s.classList.add('is-alert');
+        if(idx === 2) s.classList.add('is-locked');
+      }
+    });
+    // Dots mobile
+    stepDots.forEach((d,i) => {
+      d.classList.remove('is-active','is-done','is-alert','is-locked');
+      if(i < idx) d.classList.add('is-done');
+      else if(i === idx){
+        d.classList.add('is-active');
+        if(idx === 1) d.classList.add('is-alert');
+        if(idx === 2) d.classList.add('is-locked');
+      }
+    });
+    // Step current display
+    const s = STEPS[idx];
+    stepNum.textContent = s.num;
+    stepTtl.textContent = s.ttl;
+    stepDesc.textContent = s.desc;
+  }
+
+  function render(){
+    const d = parseFloat(slider.value);
+    const homeMode = tHome.classList.contains('on');
+    valEl.textContent = d.toFixed(1);
+    metricDist.textContent = d.toFixed(1) + ' m';
+    const pct = Math.min(95, (d / 25) * 95);
+    viz.style.setProperty('--device-pos', (pct + 5) + '%');
+
+    screen.classList.remove('state-ok','state-alert','state-locked','state-home');
+
+    if(homeMode){
+      screen.classList.add('state-home');
+      setColors('#2563eb', 'rgba(37,99,235,.15)', 'rgba(37,99,235,.32)', 'rgba(37,99,235,.18)');
+      pillText.textContent = 'MODO HOGAR · BLOQUEO SUSPENDIDO';
+      headline.textContent = 'Estás en zona pre-verificada.';
+      sub.textContent = 'KIPU detectó red Wi-Fi del hogar/oficina. El bloqueo por distancia queda suspendido.';
+      hdrStatus.textContent = 'Geofence: Hogar activo · Sin alertas';
+      modeMobile.classList.remove('active');
+      modeHome.classList.add('active');
+      metricLat.textContent = 'GEO ✓';
+      appsCount.textContent = '8 protegidas · modo casa';
+      action.style.display = 'inline-flex';
+      actionText.textContent = 'Salir del modo Hogar';
+      hideNotif(); hideLock();
+      activateStep(0);
+      helperTxt.innerHTML = '<strong>Modo Hogar activo:</strong> KIPU reconoció tu red Wi-Fi pre-verificada. La protección perimetral no se activará dentro de este espacio seguro.';
+      return;
+    }
+
+    modeMobile.classList.add('active');
+    modeHome.classList.remove('active');
+
+    const zone = getZone(d);
+
+    if(zone === 'ok'){
+      screen.classList.add('state-ok');
+      setColors('#10b981', 'rgba(16,185,129,.12)', 'rgba(16,185,129,.32)', 'rgba(16,185,129,.18)');
+      pillText.textContent = 'PROTEGIDO';
+      headline.textContent = 'Tu patrimonio está protegido.';
+      sub.textContent = 'La cápsula KIPU y tu celular están enlazados dentro del radio seguro.';
+      hdrStatus.textContent = 'Sistema armado · Lima · San Isidro';
+      metricLat.textContent = (38 + Math.floor(d*4)) + ' ms';
+      appsCount.textContent = '8 vigentes';
+      action.style.display = 'inline-flex';
+      actionText.textContent = 'Ver historial de protección';
+      hideNotif(); hideLock();
+      activateStep(0);
+      helperTxt.innerHTML = '<strong>Estado seguro:</strong> Mientras el celular y la cápsula KIPU estén dentro de los 10 metros, todo funciona con normalidad. La app permanece silenciosa en segundo plano.';
+    }
+    else if(zone === 'alert'){
+      screen.classList.add('state-alert');
+      setColors('#f59e0b', 'rgba(245,158,11,.12)', 'rgba(245,158,11,.32)', 'rgba(245,158,11,.18)');
+      pillText.textContent = 'ALERTA PERIMETRAL';
+      headline.textContent = 'Te estás alejando de KIPU.';
+      sub.textContent = 'El enlace BLE se está debilitando. Si superas 15 m, las billeteras se bloquearán automáticamente.';
+      hdrStatus.textContent = 'Atención · Distancia crítica detectada';
+      metricLat.textContent = (60 + Math.floor((d-10)*40)) + ' ms';
+      appsCount.textContent = '8 en vigilancia';
+      action.style.display = 'inline-flex';
+      actionText.textContent = 'Confirmar que soy yo';
+      showNotif({
+        title: 'Alerta perimetral',
+        msg: 'Distancia: ' + d.toFixed(1) + ' m. Bloqueo en ' + Math.max(0,(15-d)).toFixed(1) + ' m más.'
+      });
+      hideLock();
+      activateStep(1);
+      helperTxt.innerHTML = '<strong>Zona de alerta (10–15 m):</strong> KIPU emite advertencia preventiva. Si fuiste tú quien se alejó, puedes confirmar con un tap. Si no, el bloqueo se ejecutará al cruzar el umbral.';
+    }
+    else {
+      screen.classList.add('state-locked');
+      setColors('#ef4444', 'rgba(239,68,68,.12)', 'rgba(239,68,68,.32)', 'rgba(239,68,68,.18)');
+      pillText.textContent = 'BLOQUEO PERIMETRAL';
+      headline.textContent = 'Dead Man\'s Switch ejecutado.';
+      sub.textContent = 'Las billeteras digitales fueron cerradas. La memoria caché se eliminó. El terminal está congelado.';
+      hdrStatus.textContent = 'EVT-LOCK activo · Ruptura BLE confirmada';
+      metricLat.textContent = 'SIN SEÑAL';
+      appsCount.textContent = '8 bloqueadas';
+      action.style.display = 'none';
+      showNotif({
+        title: 'Bloqueo ejecutado',
+        msg: 'Pérdida del enlace BLE confirmada. Billeteras digitales seguras.'
+      });
+      showLock();
+      activateStep(2);
+      helperTxt.innerHTML = '<strong>Bloqueo automático:</strong> En menos de 800 ms KIPU cerró las sesiones bancarias y envió las últimas coordenadas GPS encriptadas al servidor central. El delincuente queda con un equipo inservible.';
+    }
+  }
+
+  slider.addEventListener('input', () => {
+    if(walkInterval){ clearInterval(walkInterval); walkInterval = null; }
+    render();
+  });
+
+  tHome.addEventListener('click', () => { tHome.classList.toggle('on'); render(); });
+  tJam.addEventListener('click',  () => { tJam.classList.toggle('on'); });
+
+  document.getElementById('sc-reset').addEventListener('click', () => {
+    if(walkInterval){ clearInterval(walkInterval); walkInterval = null; }
+    tHome.classList.remove('on');
+    slider.value = 3.4;
+    render();
+  });
+
+  document.getElementById('sc-walk').addEventListener('click', () => {
+    if(walkInterval){ clearInterval(walkInterval); walkInterval = null; }
+    tHome.classList.remove('on');
+    slider.value = 0;
+    render();
+    walkInterval = setInterval(() => {
+      let v = parseFloat(slider.value);
+      v += 0.5;
+      if(v >= 16){
+        slider.value = 16; render();
+        clearInterval(walkInterval); walkInterval = null;
+      } else { slider.value = v; render(); }
+    }, 200);
+  });
+
+  document.getElementById('sc-snatch').addEventListener('click', () => {
+    if(walkInterval){ clearInterval(walkInterval); walkInterval = null; }
+    tHome.classList.remove('on');
+    slider.value = 3; render();
+    setTimeout(() => { slider.value = 8; render(); }, 250);
+    setTimeout(() => { slider.value = 14; render(); }, 500);
+    setTimeout(() => { slider.value = 20; render(); }, 750);
+  });
+
+  document.getElementById('sc-jam').addEventListener('click', () => {
+    if(walkInterval){ clearInterval(walkInterval); walkInterval = null; }
+    tHome.classList.remove('on');
+    slider.value = 4; render();
+    setTimeout(() => {
+      slider.value = 18; render();
+      headline.textContent = 'Inhibidor de señal detectado.';
+      sub.textContent = 'KIPU detectó pérdida abrupta del enlace BLE. Tratamos el silencio como ataque y bloqueamos preventivamente.';
+      hdrStatus.textContent = 'Anti-Jamming · ataque activo bloqueado';
+      showNotif({
+        title: 'Anti-Jamming activado',
+        msg: 'Ruptura anómala del enlace BLE. Posible inhibidor de señal.'
+      });
+      helperTxt.innerHTML = '<strong>Módulo Anti-Jamming:</strong> Cuando un delincuente usa un bloqueador para cortar el Bluetooth, KIPU interpreta el silencio anormal como hostilidad activa y bloquea de inmediato — no espera al umbral de 15 m.';
+    }, 450);
+  });
+
+  unlockBtn.addEventListener('click', () => {
+    slider.value = 3.4;
+    render();
+    activateStep(3);
+    showNotif({
+      title: 'Acceso recuperado',
+      msg: 'PIN Maestro verificado. Sesiones restauradas sin pérdida de datos.'
+    });
+    helperTxt.innerHTML = '<strong>Recuperación segura:</strong> Solo el usuario legítimo conoce el PIN Maestro Forense de 8 dígitos. El sistema restaura las sesiones bancarias sin haber expuesto datos al delincuente.';
+    setTimeout(() => { hideNotif(); render(); }, 2400);
+  });
+
+  render();
+</script>
+</body>
+</html>
